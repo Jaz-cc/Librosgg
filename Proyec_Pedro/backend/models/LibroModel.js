@@ -103,56 +103,11 @@ const obtenerLibroPorId = (id, callback) => {
 
     conexion.query(sql, [id], callback);
 };
-// Obtener un libro por su ID
-const obtenerLibroPorIdSimple = (id, callback) => {
-
-    conexion.query(
-        "SELECT * FROM libros WHERE id = ?",
-        [id],
-        callback
-    );
-
-};
-
-
-// Descontar stock
-const descontarStock = (id, cantidad, callback) => {
-
-    conexion.query(
-        `
-        UPDATE libros
-        SET stock = stock - ?
-        WHERE id = ?
-        `,
-        [cantidad, id],
-        callback
-    );
-
-};
-
-
-// Aumentar stock
-const aumentarStock = (id, cantidad, callback) => {
-
-    conexion.query(
-        `
-        UPDATE libros
-        SET stock = stock + ?
-        WHERE id = ?
-        `,
-        [cantidad, id],
-        callback
-    );
-
-};
 
 module.exports = {
     obtenerLibros,
     obtenerLibroPorId,
     crearLibro,
     actualizarLibro,
-    eliminarLibro,
-    obtenerLibroPorIdSimple,
-    descontarStock,
-    aumentarStock
+    eliminarLibro
 };
