@@ -1,6 +1,6 @@
 const conexion = require("../config/db");
 
-const login = (correo, callback) => {
+const login = async (correo) => {
 
     const sql = `
         SELECT
@@ -15,9 +15,15 @@ const login = (correo, callback) => {
         WHERE u.correo = ?;
     `;
 
-    conexion.query(sql, [correo], callback);
+    const [usuario] = await conexion.query(
+        sql,
+        [correo]
+    );
+
+    return usuario;
 
 };
+
 
 module.exports = {
     login

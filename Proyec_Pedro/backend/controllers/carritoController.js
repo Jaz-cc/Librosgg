@@ -1,468 +1,264 @@
 const Carrito = require("../models/carritoModel");
 const Libro = require("../models/libroModel");
 
+
 // GET carrito del usuario
-const getCarrito = (req, res) => {
+const getCarrito = async (req, res) => {
 
-    const usuario_id = req.usuario.id;
+    try {
 
-    Carrito.obtenerCarritoUsuario(usuario_id, (error, resultado) => {
+        const usuario_id = req.usuario.id;
 
-        if (error) {
-            return res.status(500).json(error);
-        }
+        const carrito = await Carrito.obtenerCarritoUsuario(usuario_id);
 
-        if (resultado.length === 0) {
+        if (carrito.length === 0) {
             return res.json([]);
         }
 
-        const carrito_id = resultado[0].id;
+        const productos = await Carrito.obtenerDetalleCarrito(
+            carrito[0].id
+        );
 
-        Carrito.obtenerDetalleCarrito(carrito_id, (error, productos) => {
+        res.json(productos);
 
-            if (error) {
-                return res.status(500).json(error);
-            }
 
-            res.json(productos);
+    } catch(error){
 
-        });
+        console.log(error);
 
-    });
+        res.status(500).json(error);
 
-};
-const obtenerProductoCarrito = (id, callback) => {
-
-    conexion.query(
-
-        `
-        SELECT *
-        FROM detalle_carrito
-        WHERE id = ?
-        `,
-
-        [id],
-
-        callback
-
-    );
+    }
 
 };
+
+
 
 // POST agregar libro al carrito
-const postCarrito = (req, res) => {
+const postCarrito = async (req,res)=>{
 
-    const usuario_id = req.usuario.id;
+    try {
 
-    const {
+        const usuario_id = req.usuario.id;
 
-        libro_id,
+        const {
+            libro_id,
+            cantidad
+        } = req.body;
 
-        cantidad
 
-    } = req.body;
+        let carrito = await Carrito.obtenerCarritoUsuario(usuario_id);
 
-    Carrito.obtenerCarritoUsuario(usuario_id, (error, resultado) => {
 
-        if (error) {
-            return res.status(500).json(error);
+        let carrito_id;
+
+
+        if(carrito.length === 0){
+
+            const nuevo = await Carrito.crearCarrito(usuario_id);
+
+            carrito_id = nuevo.insertId;
+
+        }else{
+
+            carrito_id = carrito[0].id;
+
         }
 
-        if (resultado.length === 0) {
 
-            Carrito.crearCarrito(usuario_id, (error, nuevoCarrito) => {
+        const libro = await Libro.obtenerLibroPorIdSimple(libro_id);
 
-                if (error) {
-                    return res.status(500).json(error);
-                }
 
-                agregarProducto(
-                    nuevoCarrito.insertId,
-                    libro_id,
-                    cantidad,
-                    res
-                );
+        if(libro.length === 0){
 
+            return res.status(404).json({
+                mensaje:"Libro no encontrado"
             });
 
-        } else {
+        }
 
-            agregarProducto(
-                resultado[0].id,
+
+        if(libro[0].stock < cantidad){
+
+            return res.status(400).json({
+                mensaje:"Stock insuficiente"
+            });
+
+        }
+
+
+        const existe = await Carrito.buscarLibroCarrito(
+            carrito_id,
+            libro_id
+        );
+
+
+        if(existe.length > 0){
+
+            const nuevaCantidad =
+                existe[0].cantidad + cantidad;
+
+
+            await Carrito.actualizarCantidad(
+                existe[0].id,
+                nuevaCantidad
+            );
+
+
+        }else{
+
+            await Carrito.agregarLibro(
+                carrito_id,
                 libro_id,
-                cantidad,
-                res
+                cantidad
             );
 
         }
 
-    });
 
-};
-
-
-// PUT cambiar cantidad
-const putCarrito = (req, res) => {
-
-    const id = req.params.id;
-
-    const nuevaCantidad = req.body.cantidad;
-
-    Carrito.obtenerItemPorId(id, (error, resultado) => {
-
-        if (error)
-            return res.status(500).json(error);
-
-        if (resultado.length == 0)
-            return res.status(404).json({
-                mensaje: "Producto no encontrado"
-            });
-
-        const item = resultado[0];
-
-        const diferencia =
-            item.cantidad - nuevaCantidad;
-
-        Carrito.actualizarStockLibro(
-
-            item.libro_id,
-
-            diferencia,
-
-            (error) => {
-
-                if (error)
-                    return res.status(500).json(error);
-
-                Carrito.actualizarCantidad(
-
-                    id,
-
-                    nuevaCantidad,
-
-                    (error) => {
-
-                        if (error)
-                            return res.status(500).json(error);
-
-                        res.json({
-
-                            mensaje:
-                                "Cantidad actualizada"
-
-                        });
-
-                    }
-
-                );
-
-            }
-
+        await Libro.descontarStock(
+            libro_id,
+            cantidad
         );
 
-    });
+
+        res.json({
+            mensaje:"Libro agregado al carrito"
+        });
+
+
+    }catch(error){
+
+        console.log(error);
+
+        res.status(500).json(error);
+
+    }
 
 };
+
+
+
+// PUT actualizar cantidad
+const putCarrito = async(req,res)=>{
+
+    try{
+
+        const id = req.params.id;
+
+        const cantidad = req.body.cantidad;
+
+
+        const item = await Carrito.obtenerItemPorId(id);
+
+
+        if(item.length===0){
+
+            return res.status(404).json({
+                mensaje:"Producto no encontrado"
+            });
+
+        }
+
+
+        await Carrito.actualizarCantidad(
+            id,
+            cantidad
+        );
+
+
+        res.json({
+            mensaje:"Cantidad actualizada"
+        });
+
+
+    }catch(error){
+
+        console.log(error);
+
+        res.status(500).json(error);
+
+    }
+
+};
+
 
 
 // DELETE producto
-const deleteProducto = (req, res) => {
+const deleteProducto = async(req,res)=>{
 
-    const id = req.params.id;
+    try{
 
-    Carrito.eliminarProducto(id, (error) => {
+        const id=req.params.id;
 
-        if (error) {
-            return res.status(500).json(error);
-        }
+
+        await Carrito.eliminarProducto(id);
+
 
         res.json({
-
-            mensaje: "Producto eliminado"
-
+            mensaje:"Producto eliminado"
         });
 
-    });
+
+    }catch(error){
+
+        res.status(500).json(error);
+
+    }
 
 };
+
 
 
 // DELETE vaciar carrito
-const deleteCarrito = (req, res) => {
+const deleteTodoCarrito = async(req,res)=>{
 
-    const id = req.params.id;
+    try{
 
-    Carrito.obtenerItemPorId(id, (error, resultado) => {
+        const usuario_id=req.usuario.id;
 
-        if (error)
-            return res.status(500).json(error);
 
-        if (resultado.length == 0)
-            return res.status(404).json({
-                mensaje: "Producto no encontrado"
-            });
+        const carrito =
+            await Carrito.obtenerCarritoUsuario(usuario_id);
 
-        const item = resultado[0];
 
-        Carrito.actualizarStockLibro(
+        if(carrito.length===0){
 
-            item.libro_id,
-
-            item.cantidad,
-
-            (error) => {
-
-                if (error)
-                    return res.status(500).json(error);
-
-                Carrito.eliminarProducto(
-
-                    id,
-
-                    (error) => {
-
-                        if (error)
-                            return res.status(500).json(error);
-
-                        res.json({
-
-                            mensaje:
-                                "Producto eliminado"
-
-                        });
-
-                    }
-
-                );
-
-            }
-
-        );
-
-    });
-
-};
-
-const deleteTodoCarrito = (req, res) => {
-
-    const usuario_id = req.usuario.id;
-
-    Carrito.obtenerItemsCarrito(usuario_id, (error, items) => {
-
-        if (error)
-            return res.status(500).json(error);
-
-        if (items.length == 0)
             return res.json({
-                mensaje: "Carrito vacío"
+                mensaje:"Carrito vacío"
             });
-
-        let pendientes = items.length;
-
-        items.forEach(item => {
-
-            Carrito.actualizarStockLibro(
-
-                item.libro_id,
-
-                item.cantidad,
-
-                (error) => {
-
-                    if (error)
-                        return res.status(500).json(error);
-
-                    pendientes--;
-
-                    if (pendientes == 0) {
-
-                        Carrito.vaciarCarrito(
-
-                            usuario_id,
-
-                            (error) => {
-
-                                if (error)
-                                    return res.status(500).json(error);
-
-                                res.json({
-
-                                    mensaje:
-                                        "Carrito vaciado correctamente"
-
-                                });
-
-                            }
-
-                        );
-
-                    }
-
-                }
-
-            );
-
-        });
-
-    });
-
-};
-
-
-// Función privada
-function agregarProducto(
-    carrito_id,
-    libro_id,
-    cantidad,
-    res
-){
-
-    Libro.obtenerLibroPorIdSimple(
-
-        libro_id,
-
-        (error, libro)=>{
-
-            if(error){
-
-                return res.status(500).json(error);
-
-            }
-
-            if(libro.length==0){
-
-                return res.status(404).json({
-
-                    mensaje:"Libro no encontrado"
-
-                });
-
-            }
-
-            if(libro[0].stock < cantidad){
-
-                return res.status(400).json({
-
-                    mensaje:"Stock insuficiente"
-
-                });
-
-            }
-
-
-            Libro.descontarStock(
-
-                libro_id,
-
-                cantidad,
-
-                (error)=>{
-
-                    if(error){
-
-                        return res.status(500).json(error);
-
-                    }
-
-
-                    Carrito.buscarLibroCarrito(
-
-                        carrito_id,
-
-                        libro_id,
-
-                        (error,resultado)=>{
-
-                            if(error){
-
-                                return res.status(500).json(error);
-
-                            }
-
-                            if(resultado.length>0){
-
-                                const nuevaCantidad =
-                                resultado[0].cantidad + cantidad;
-
-                                Carrito.actualizarCantidad(
-
-                                    resultado[0].id,
-
-                                    nuevaCantidad,
-
-                                    (error)=>{
-
-                                        if(error){
-
-                                            return res.status(500).json(error);
-
-                                        }
-
-                                        res.json({
-
-                                            mensaje:"Cantidad actualizada"
-
-                                        });
-
-                                    }
-
-                                );
-
-                            }else{
-
-                                Carrito.agregarLibro(
-
-                                    carrito_id,
-
-                                    libro_id,
-
-                                    cantidad,
-
-                                    (error)=>{
-
-                                        if(error){
-
-                                            return res.status(500).json(error);
-
-                                        }
-
-                                        res.json({
-
-                                            mensaje:"Libro agregado"
-
-                                        });
-
-                                    }
-
-                                );
-
-                            }
-
-                        }
-
-                    );
-
-                }
-
-            );
 
         }
 
-    );
 
-}
+        await Carrito.vaciarCarrito(
+            carrito[0].id
+        );
+
+
+        res.json({
+            mensaje:"Carrito vaciado correctamente"
+        });
+
+
+    }catch(error){
+
+        console.log(error);
+
+        res.status(500).json(error);
+
+    }
+
+};
+
 
 
 module.exports = {
 
     getCarrito,
-
     postCarrito,
-
     putCarrito,
-
     deleteProducto,
-
-    deleteCarrito
+    deleteTodoCarrito
 
 };

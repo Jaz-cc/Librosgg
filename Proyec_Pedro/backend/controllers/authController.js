@@ -1,24 +1,32 @@
 const jwt = require("jsonwebtoken");
 const Auth = require("../models/authModel");
 
-const login = (req, res) => {
 
-    const { correo, password } = req.body;
+const login = async (req, res) => {
 
-    Auth.login(correo, (error, resultados) => {
+    try {
 
-        if (error)
-            return res.status(500).json(error);
+        const { correo, password } = req.body;
 
-        if (resultados.length === 0)
+
+        const resultados = await Auth.login(correo);
+
+
+        if (resultados.length === 0) {
+
             return res.status(401).json({
                 mensaje: "Correo o contraseña incorrectos"
             });
 
+        }
+
+
         const usuario = resultados[0];
 
-        // Por ahora compararemos texto plano.
-        // Después cambiaremos a bcrypt.
+
+        // Por ahora comparación en texto plano
+        // Después se puede cambiar a bcrypt
+
         if (usuario.password !== password) {
 
             return res.status(401).json({
@@ -26,6 +34,7 @@ const login = (req, res) => {
             });
 
         }
+
 
         const token = jwt.sign(
 
@@ -41,6 +50,7 @@ const login = (req, res) => {
             }
 
         );
+
 
         res.json({
 
@@ -58,9 +68,19 @@ const login = (req, res) => {
 
         });
 
-    });
+
+    } catch(error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            mensaje:"Error en el login"
+        });
+
+    }
 
 };
+
 
 module.exports = {
     login

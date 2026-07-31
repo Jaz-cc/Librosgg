@@ -1,15 +1,22 @@
 const Categoria = require("../models/categoriaModel");
 
-const getCategorias = (req, res) => {
+const getCategorias = async (req,res)=>{
 
-    Categoria.obtenerCategorias((error, resultados) => {
+    try {
 
-        if (error)
-            return res.status(500).json(error);
+        const categorias = await categoriaModel.obtenerCategorias();
 
-        res.json(resultados);
+        res.json(categorias);
 
-    });
+    } catch(error){
+
+        console.log(error);
+
+        res.status(500).json({
+            mensaje:"Error al obtener categorías"
+        });
+
+    }
 
 };
 

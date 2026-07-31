@@ -243,6 +243,41 @@ async function vaciarCarrito() {
     cargarCarrito();
 
 }
+async function realizarCompra() {
+
+    const token = localStorage.getItem("token");
+
+    const respuesta = await fetch(
+
+        "http://localhost:3000/api/ventas",
+
+        {
+
+            method:"POST",
+
+            headers:{
+
+                Authorization:`Bearer ${token}`
+
+            }
+
+        }
+
+    );
+
+    const datos = await respuesta.json();
+
+    alert(datos.mensaje);
+
+    if(datos.venta_id){
+
+        document.getElementById("ordenGenerada").innerText =
+        "Orden #" + datos.venta_id;
+
+        document.getElementById("pantallaExito").style.display = "flex";
+    }
+
+}
 
 
 // =======================

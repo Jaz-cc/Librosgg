@@ -1,7 +1,8 @@
 const conexion = require("../config/db");
 
+
 // Crear un libro
-const crearLibro = (libro, callback) => {
+const crearLibro = async (libro) => {
 
     const sql = `
         INSERT INTO libros
@@ -9,7 +10,7 @@ const crearLibro = (libro, callback) => {
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
-    conexion.query(sql, [
+    const [resultado] = await conexion.query(sql, [
         libro.titulo,
         libro.autor,
         libro.precio,
@@ -17,12 +18,14 @@ const crearLibro = (libro, callback) => {
         libro.imagen,
         libro.descripcion,
         libro.categoria_id
-    ], callback);
+    ]);
 
+    return resultado;
 };
 
+
 // Actualizar un libro
-const actualizarLibro = (id, libro, callback) => {
+const actualizarLibro = async (id, libro) => {
 
     const sql = `
         UPDATE libros
@@ -37,7 +40,7 @@ const actualizarLibro = (id, libro, callback) => {
         WHERE id = ?
     `;
 
-    conexion.query(sql, [
+    const [resultado] = await conexion.query(sql, [
         libro.titulo,
         libro.autor,
         libro.precio,
@@ -46,23 +49,26 @@ const actualizarLibro = (id, libro, callback) => {
         libro.descripcion,
         libro.categoria_id,
         id
-    ], callback);
+    ]);
 
+    return resultado;
 };
+
 
 // Eliminar un libro
-const eliminarLibro = (id, callback) => {
+const eliminarLibro = async (id) => {
 
-    conexion.query(
+    const [resultado] = await conexion.query(
         "DELETE FROM libros WHERE id = ?",
-        [id],
-        callback
+        [id]
     );
 
+    return resultado;
 };
 
+
 // Obtener todos los libros
-const obtenerLibros = (callback) => {
+const obtenerLibros = async () => {
 
     const sql = `
         SELECT
@@ -79,11 +85,14 @@ const obtenerLibros = (callback) => {
             ON l.categoria_id = c.id;
     `;
 
-    conexion.query(sql, callback);
+    const [libros] = await conexion.query(sql);
+
+    return libros;
 };
 
+
 // Obtener un libro por ID
-const obtenerLibroPorId = (id, callback) => {
+const obtenerLibroPorId = async (id) => {
 
     const sql = `
         SELECT
@@ -101,50 +110,55 @@ const obtenerLibroPorId = (id, callback) => {
         WHERE l.id = ?;
     `;
 
-    conexion.query(sql, [id], callback);
-};
-// Obtener un libro por su ID
-const obtenerLibroPorIdSimple = (id, callback) => {
+    const [libro] = await conexion.query(sql, [id]);
 
-    conexion.query(
+    return libro;
+};
+
+
+// Obtener libro simple
+const obtenerLibroPorIdSimple = async (id) => {
+
+    const [libro] = await conexion.query(
         "SELECT * FROM libros WHERE id = ?",
-        [id],
-        callback
+        [id]
     );
 
+    return libro;
 };
 
 
 // Descontar stock
-const descontarStock = (id, cantidad, callback) => {
+const descontarStock = async (id, cantidad) => {
 
-    conexion.query(
+    const [resultado] = await conexion.query(
         `
         UPDATE libros
         SET stock = stock - ?
         WHERE id = ?
         `,
-        [cantidad, id],
-        callback
+        [cantidad, id]
     );
 
+    return resultado;
 };
 
 
 // Aumentar stock
-const aumentarStock = (id, cantidad, callback) => {
+const aumentarStock = async (id, cantidad) => {
 
-    conexion.query(
+    const [resultado] = await conexion.query(
         `
         UPDATE libros
         SET stock = stock + ?
         WHERE id = ?
         `,
-        [cantidad, id],
-        callback
+        [cantidad, id]
     );
 
+    return resultado;
 };
+
 
 module.exports = {
     obtenerLibros,

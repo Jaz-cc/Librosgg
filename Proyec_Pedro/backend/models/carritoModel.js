@@ -1,7 +1,8 @@
 const conexion = require("../config/db");
 
+
 // Buscar el carrito del usuario
-const obtenerCarritoUsuario = (usuario_id, callback) => {
+const obtenerCarritoUsuario = async (usuario_id) => {
 
     const sql = `
         SELECT c.id
@@ -9,26 +10,30 @@ const obtenerCarritoUsuario = (usuario_id, callback) => {
         WHERE c.usuario_id = ?
     `;
 
-    conexion.query(sql, [usuario_id], callback);
+    const [carrito] = await conexion.query(sql, [usuario_id]);
+
+    return carrito;
 
 };
 
 
 // Crear un carrito
-const crearCarrito = (usuario_id, callback) => {
+const crearCarrito = async (usuario_id) => {
 
     const sql = `
         INSERT INTO carrito (usuario_id)
         VALUES (?)
     `;
 
-    conexion.query(sql, [usuario_id], callback);
+    const [resultado] = await conexion.query(sql, [usuario_id]);
+
+    return resultado;
 
 };
 
 
 // Obtener los productos del carrito
-const obtenerDetalleCarrito = (carrito_id, callback) => {
+const obtenerDetalleCarrito = async (carrito_id) => {
 
     const sql = `
         SELECT
@@ -44,13 +49,15 @@ const obtenerDetalleCarrito = (carrito_id, callback) => {
         WHERE dc.carrito_id = ?
     `;
 
-    conexion.query(sql, [carrito_id], callback);
+    const [productos] = await conexion.query(sql, [carrito_id]);
+
+    return productos;
 
 };
 
 
-// Verificar si un libro ya está en el carrito
-const buscarLibroCarrito = (carrito_id, libro_id, callback) => {
+// Buscar si un libro ya está en carrito
+const buscarLibroCarrito = async (carrito_id, libro_id) => {
 
     const sql = `
         SELECT *
@@ -59,13 +66,18 @@ const buscarLibroCarrito = (carrito_id, libro_id, callback) => {
         AND libro_id = ?
     `;
 
-    conexion.query(sql, [carrito_id, libro_id], callback);
+    const [producto] = await conexion.query(
+        sql,
+        [carrito_id, libro_id]
+    );
+
+    return producto;
 
 };
 
 
-// Agregar un libro
-const agregarLibro = (carrito_id, libro_id, cantidad, callback) => {
+// Agregar libro
+const agregarLibro = async (carrito_id, libro_id, cantidad) => {
 
     const sql = `
         INSERT INTO detalle_carrito
@@ -73,17 +85,18 @@ const agregarLibro = (carrito_id, libro_id, cantidad, callback) => {
         VALUES (?, ?, ?)
     `;
 
-    conexion.query(
+    const [resultado] = await conexion.query(
         sql,
-        [carrito_id, libro_id, cantidad],
-        callback
+        [carrito_id, libro_id, cantidad]
     );
+
+    return resultado;
 
 };
 
 
 // Actualizar cantidad
-const actualizarCantidad = (id, cantidad, callback) => {
+const actualizarCantidad = async (id, cantidad) => {
 
     const sql = `
         UPDATE detalle_carrito
@@ -91,35 +104,44 @@ const actualizarCantidad = (id, cantidad, callback) => {
         WHERE id = ?
     `;
 
-    conexion.query(sql, [cantidad, id], callback);
+    const [resultado] = await conexion.query(
+        sql,
+        [cantidad, id]
+    );
+
+    return resultado;
 
 };
 
 
-// Eliminar un producto
-const eliminarProducto = (id, callback) => {
+// Eliminar producto
+const eliminarProducto = async (id) => {
 
-    conexion.query(
+    const [resultado] = await conexion.query(
         "DELETE FROM detalle_carrito WHERE id = ?",
-        [id],
-        callback
+        [id]
     );
+
+    return resultado;
 
 };
 
 
 // Vaciar carrito
-const vaciarCarrito = (carrito_id, callback) => {
+const vaciarCarrito = async (carrito_id) => {
 
-    conexion.query(
+    const [resultado] = await conexion.query(
         "DELETE FROM detalle_carrito WHERE carrito_id = ?",
-        [carrito_id],
-        callback
+        [carrito_id]
     );
+
+    return resultado;
 
 };
 
-const obtenerItemPorId = (id, callback) => {
+
+// Obtener item por ID
+const obtenerItemPorId = async (id) => {
 
     const sql = `
         SELECT *
@@ -127,11 +149,18 @@ const obtenerItemPorId = (id, callback) => {
         WHERE id = ?
     `;
 
-    conexion.query(sql, [id], callback);
+    const [item] = await conexion.query(
+        sql,
+        [id]
+    );
+
+    return item;
 
 };
 
-const actualizarStockLibro = (idLibro, cantidad, callback) => {
+
+// Actualizar stock libro
+const actualizarStockLibro = async (idLibro, cantidad) => {
 
     const sql = `
         UPDATE libros
@@ -139,20 +168,38 @@ const actualizarStockLibro = (idLibro, cantidad, callback) => {
         WHERE id = ?
     `;
 
-    conexion.query(sql, [cantidad, idLibro], callback);
+    const [resultado] = await conexion.query(
+        sql,
+        [cantidad, idLibro]
+    );
+
+    return resultado;
 
 };
-const obtenerItemsCarrito = (usuario_id, callback) => {
+
+
+// Obtener items del carrito por usuario
+const obtenerItemsCarrito = async (usuario_id) => {
 
     const sql = `
         SELECT
-            libro_id,
-            cantidad
-        FROM detalle_carrito
-        WHERE usuario_id = ?
+            dc.libro_id,
+            dc.cantidad
+
+        FROM detalle_carrito dc
+
+        INNER JOIN carrito c
+            ON dc.carrito_id = c.id
+
+        WHERE c.usuario_id = ?
     `;
 
-    conexion.query(sql, [usuario_id], callback);
+    const [items] = await conexion.query(
+        sql,
+        [usuario_id]
+    );
+
+    return items;
 
 };
 

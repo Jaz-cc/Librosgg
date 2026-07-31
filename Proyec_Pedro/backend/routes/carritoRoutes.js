@@ -37,7 +37,7 @@ router.delete(
 router.delete(
     "/",
     verificarToken,
-    carritoController.deleteCarrito
+    carritoController.deleteTodoCarrito
 );
 
 module.exports = router;

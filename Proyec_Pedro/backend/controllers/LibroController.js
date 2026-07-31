@@ -1,102 +1,159 @@
 const Libro = require("../models/libroModel");
 
+
 // GET todos
-const getLibros = (req, res) => {
+const getLibros = async (req, res) => {
 
-    Libro.obtenerLibros((error, resultados) => {
+    try {
 
-        if (error) {
-            return res.status(500).json(error);
-        }
+        const libros = await Libro.obtenerLibros();
 
-        res.json(resultados);
+        res.json(libros);
 
-    });
+    } catch(error){
+
+        console.log(error);
+
+        res.status(500).json({
+            mensaje:"Error al obtener libros"
+        });
+
+    }
 
 };
 
+
 // GET por ID
-const getLibroPorId = (req, res) => {
+const getLibroPorId = async (req, res) => {
 
-    const id = req.params.id;
+    try {
 
-    Libro.obtenerLibroPorId(id, (error, resultados) => {
+        const id = req.params.id;
 
-        if (error) {
-            return res.status(500).json(error);
-        }
+        const resultados = await Libro.obtenerLibroPorId(id);
+
 
         if (resultados.length === 0) {
+
             return res.status(404).json({
-                mensaje: "Libro no encontrado"
+                mensaje:"Libro no encontrado"
             });
+
         }
+
 
         res.json(resultados[0]);
 
-    });
+
+    } catch(error){
+
+        console.log(error);
+
+        res.status(500).json(error);
+
+    }
 
 };
+
+
+
 // POST
-const postLibro = (req, res) => {
+const postLibro = async (req, res) => {
 
-    Libro.crearLibro(req.body, (error, resultado) => {
+    try {
 
-        if (error) {
-            return res.status(500).json(error);
-        }
+        const resultado = await Libro.crearLibro(req.body);
+
 
         res.status(201).json({
-            mensaje: "Libro agregado correctamente",
-            id: resultado.insertId
+
+            mensaje:"Libro agregado correctamente",
+
+            id:resultado.insertId
+
         });
 
-    });
+
+    } catch(error){
+
+        console.log(error);
+
+        res.status(500).json(error);
+
+    }
 
 };
+
+
 
 // PUT
-const putLibro = (req, res) => {
+const putLibro = async (req, res) => {
 
-    const id = req.params.id;
+    try {
 
-    Libro.actualizarLibro(id, req.body, (error) => {
+        const id = req.params.id;
 
-        if (error) {
-            return res.status(500).json(error);
-        }
+
+        await Libro.actualizarLibro(
+            id,
+            req.body
+        );
+
 
         res.json({
-            mensaje: "Libro actualizado correctamente"
+
+            mensaje:"Libro actualizado correctamente"
+
         });
 
-    });
+
+    } catch(error){
+
+        console.log(error);
+
+        res.status(500).json(error);
+
+    }
 
 };
+
+
 
 // DELETE
-const deleteLibro = (req, res) => {
+const deleteLibro = async (req, res) => {
 
-    const id = req.params.id;
+    try {
 
-    Libro.eliminarLibro(id, (error) => {
+        const id = req.params.id;
 
-        if (error) {
-            return res.status(500).json(error);
-        }
+
+        await Libro.eliminarLibro(id);
+
 
         res.json({
-            mensaje: "Libro eliminado correctamente"
+
+            mensaje:"Libro eliminado correctamente"
+
         });
 
-    });
+
+    } catch(error){
+
+        console.log(error);
+
+        res.status(500).json(error);
+
+    }
 
 };
 
+
 module.exports = {
+
     getLibros,
     getLibroPorId,
     postLibro,
     putLibro,
     deleteLibro
+
 };
