@@ -1,11 +1,6 @@
-// Si más adelante sacas una key gratis en Google Cloud Console,
-// pégala aquí. Déjala vacía para probar sin key.
 const GOOGLE_BOOKS_API_KEY = "AIzaSyBpff3GInWGJ6OWfvBhxdSD8IBz06pS1KU";
 
-/* Construye la URL de búsqueda con parámetros útiles:
-   - maxResults: cuántos resultados traer (máx. 40)
-   - langRestrict: es = resultados en español
-   - printType=books: excluye revistas */
+
 function construirUrlBusqueda(texto) {
   const params = new URLSearchParams({
     q: texto,
@@ -18,8 +13,6 @@ function construirUrlBusqueda(texto) {
   return `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
 }
 
-/* Función principal: busca en Google Books y pinta los resultados.
-   Es async porque la llamada de red no es instantánea. */
 async function buscarLibro() {
   const texto = document.getElementById("busqueda").value.trim();
   const resultado = document.getElementById("resultado");
@@ -52,7 +45,6 @@ async function buscarLibro() {
       return;
     }
 
-    // Limpiamos el "Buscando…" antes de pintar resultados
     resultado.innerHTML = "";
 
     datos.items.forEach(item => {
