@@ -1,172 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>El Principito</title>
+    <link rel="stylesheet" href="../css/estilo.css"> <!-- LLAMADO DE LA HOJA DE ESTILOS PERSONALIZADA -->
+  </head>
 
-<head>
+  <body>
+    <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="menu">
+      <a href="../index.html">Inicio</a>
+      <a href="../catalogo.html">Libros</a>
+      <a href="../buscar.html">Buscar</a>
+      <a href="../carrito.html">Carrito</a>
+      <a href="../sitiomapa.html">Mapa del sitio</a>
+    </nav>
 
-  <meta charset="UTF-8">
+                <!-- ETIQUETAS Y CAMPOS DE ENTRADA PARA VALIDAR CANTIDAD Y CONFIRMACION DE COMPRA -->
+            <label>Cantidad</label>
+            <input type="number" id="cantidad" min="1" max="5" required>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <label>Confirmar compra (SI / NO)</label>
+            <input type="text" pattern="SI|NO" required>
 
-  <title>Detalle del libro</title>
+            <!-- BOTON PARA ENVIAR FORMULARIO -->
+            <button type="submit" class="btn-comprar">
+              Agregar al carrito
+            </button>
 
-  <link rel="stylesheet" href="../css/estilo.css">
-
-</head>
-
-
-
-<body>
-
-
-  <!-- BARRA DE NAVEGACIÓN -->
-
-  <nav class="menu">
-
-    <a href="../index.html">Inicio</a>
-
-    <a href="../catalogo.html">Libros</a>
-
-    <a href="../buscar.html">Buscar</a>
-
-    <a href="../carrito.html">Carrito</a>
-
-    <a href="../sitiomapa.html">Mapa del sitio</a>
-
-  </nav>
-
-
-
-
-
-  <!-- CONTENEDOR DEL DETALLE -->
-
-  <section class="detalle-container">
-
-
-
-    <div class="detalle-imagen">
-
-      <img id="imagenLibro" alt="Imagen del libro">
-
-
+            <!-- ENLACE PARA EL CARRITO -->
+            <a href="../carrito.html" class="btn-secundario">
+              Ir al Carrito
+            </a>
+          </form>
+        </div>
+      </div>
     </div>
 
-
-
-
-
-    <div class="detalle-info">
-
-
-      <h1 id="tituloLibro"></h1>
-
-
-      <h3 id="autorLibro"></h3>
-
-
-
-      <p class="descripcion" id="descripcionLibro"></p>
-
-
-
-      <h2 id="precioLibro"></h2>
-
-
-
-      <p class="stock" id="stock"></p>
-
-
-
-
-
-      <form id="formCompra">
-
-          <label>
-            Cantidad:
-          </label>
-
-
-          <input type="number" id="cantidad" min="1" max="5" value="1" required>
-
-
-
-
-          <label>
-            Confirmar compra (SI / NO):
-          </label>
-
-
-          <input type="text" placeholder="Escribe SI" pattern="SI|NO" required>
-
-
-
-
-          <button type="submit" class="btn-comprar">
-
-            Agregar al carrito
-
-          </button>
-
-
-
-
-
-
-
-
-        <a href="../carrito.html" class="btn-secundario">
-
-          Ir al Carrito
-
-        </a>
-      </form>
-
-
+    <!-- MODAL QUE INDICA ERROR EN EL STOCK -->
+    <div id="modalMensaje" class="modal-mensaje">
+      <div class="modal-contenido">
+        <p id="textoModal"></p>
+        <button onclick="cerrarModal()">Aceptar</button>
+      </div>
     </div>
 
-
-
-  </section>
-
-
-
-
-
-
-  <!-- MODAL -->
-
-  <div id="modalMensaje" class="modal-mensaje">
-
-
-    <div class="modal-contenido">
-
-
-      <p id="textoModal"></p>
-
-
-      <button onclick="cerrarModal()">
-
-        Aceptar
-
-      </button>
-
-
-    </div>
-
-
-  </div>
-
-
-
-
-
-
-  <script src="../js/detalleLibro.js"></script>
-
-  <script src="../js/carrito.js"></script>
-
-
-
-</body>
-
+    <!-- ARCHIVOS JS -->
+    <script src="../js/libros.js"></script> <!-- LLAMADO DE CODIGO JS -->
+    <script src="../js/carrito.js"></script> <!-- LLAMADO DE CODIGO JS -->
+    <!-- SCRIPT QUE PERMITE MOSTRAR EL STOCK DISPONIBLE DEL LIBRO  -->
+    <script>
+      const libro = libros.find(l => l.titulo === "El Principito");
+      document.getElementById("stock").innerText = "Stock disponible: " + libro.stock;
+    </script>
+    
+  </body>
 </html>
