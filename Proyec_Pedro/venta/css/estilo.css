@@ -538,9 +538,20 @@ body {
 
 /* contenedor */
 .detalle-container {
-  display: flex;
-  justify-content: center;
-  padding: 40px 20px;
+  width:90%;
+    max-width:1100px;
+    margin:50px auto;
+
+    display:flex;
+    gap:50px;
+
+    background:white;
+
+    padding:40px;
+
+    border-radius:15px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,0.15);
 }
 
 .detalle-card {
@@ -554,10 +565,21 @@ body {
   box-shadow: 0 3px 10px rgba(0,0,0,0.15);
   flex-wrap: wrap;
 }
+.detalle-imagen{
+    width:40%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
 
 .detalle-imagen img {
-  width: 260px;
-  border-radius: 6px;
+    width:300px;
+    height:420px;
+    object-fit:cover;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 
 /* info */
@@ -570,6 +592,18 @@ body {
   margin-top: 0;
   font-size: 26px;
 }
+
+.detalle-info h3{
+    color:#777;
+
+}
+
+.descripcion{
+    margin-top:20px;
+    line-height:1.6;
+    font-size:17px;
+}
+
 
 /* ofertas */
 .rating {

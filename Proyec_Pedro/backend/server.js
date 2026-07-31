@@ -5,6 +5,7 @@ require("dotenv").config();
 const libroRoutes = require("./routes/libroRoutes");
 const categoriaRoutes = require("./routes/categoriaRoutes");
 const authRoutes = require("./routes/authRoutes");
+const carritoRoutes = require("./routes/carritoRoutes");
 
 const conexion = require("./config/db");
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/libros", libroRoutes);
 app.use("/api/categorias", categoriaRoutes);
 app.use("/api", authRoutes);
+app.use("/api/carrito", carritoRoutes);
 
 app.get("/", (req, res) => {
 
