@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador</title>
+
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+
+
+<body>
+
+
+    <header>
+
+        <h1>
+            Panel de Administrador
+        </h1>
+
+
+        <button id="cerrarSesion">
+            Cerrar sesión
+        </button>
+
+    </header>
+
+
+
+
+    <main>
+
+
+        <section>
+
+
+            <h2>
+                Agregar / Editar libro
+            </h2>
+
+
+
+            <input type="hidden" id="idLibro">
+
+
+
+            <input type="text" id="titulo" placeholder="Título">
+
+
+
+            <input type="text" id="autor" placeholder="Autor">
+
+
+
+            <input type="number" id="precio" placeholder="Precio">
+
+
+
+            <input type="number" id="stock" placeholder="Stock">
+
+
+
+            <input type="text" id="imagen" placeholder="URL imagen">
+
+
+
+            <textarea id="descripcion" placeholder="Descripción">
+</textarea>
+
+
+
+
+            <input type="number" id="categoria_id" placeholder="ID categoría">
+
+
+
+
+
+            <button id="guardarLibro">
+
+                Guardar libro
+
+            </button>
+
+
+
+            <button id="cancelarEdicion">
+
+                Limpiar
+
+            </button>
+
+
+
+            <p id="mensaje"></p>
+
+
+
+        </section>
+
+
+
+
+
+
+        <section>
+
+
+            <h2>
+                Lista de libros
+            </h2>
+
+
+
+
+            <table border="1">
+
+
+                <thead>
+
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Título</th>
+
+                        <th>Autor</th>
+
+                        <th>Precio</th>
+
+                        <th>Stock</th>
+
+                        <th>Imagen</th>
+
+                        <th>Acciones</th>
+
+
+                    </tr>
+
+
+                </thead>
+
+
+
+
+                <tbody id="tablaLibros">
+
+
+                </tbody>
+
+
+
+            </table>
+
+
+
+        </section>
+
+
+
+    </main>
+
+
+
+
+    <script src="../js/admin.js"></script>
+
+
+</body>
+
+</html>

@@ -1,38 +1,56 @@
-/* Evento que se ejecuta cuando el DOM ha cargado completamente.
- * Garantiza que los elementos HTML existan antes de manipularlos. */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-  // Obtiene el contenedor donde se listarán los libros
-  const contenedor = document.getElementById("listaLibros");
+    const contenedor = document.getElementById("listaLibros");
 
-  // Verifica que el contenedor exista y que el arreglo "libros" esté definido
-  // Si alguno no existe, se detiene la ejecución
-  if (!contenedor || typeof libros === "undefined") return;
+    try {
 
-  // Limpia el contenido previo del contenedor
-  contenedor.innerHTML = "";
+        const respuesta = await fetch("http://localhost:3000/api/libros");
 
-  // Recorre el arreglo de libros para mostrarlos en pantalla
-  libros.forEach(libro => {
+        const libros = await respuesta.json();
 
-    // Inserta dinámicamente la información de cada libro
-    contenedor.innerHTML += `
-      <div class="libro">
-        
-        <!-- Título del libro -->
-        <h3>${libro.titulo}</h3>
+        contenedor.innerHTML = "";
 
-        <!-- Autor del libro -->
-        <p><strong>Autor:</strong> ${libro.autor}</p>
+        libros.forEach(libro => {
 
-        <!-- Precio del libro -->
-        <p><strong>Precio:</strong> $${libro.precio}</p>
+            contenedor.innerHTML += `
+                <div class="col-md-3 col-sm-6">
 
-        <!-- Botón que envía el libro al carrito -->
-        <button onclick="agregarAlCarrito('${libro.titulo}', ${libro.precio})">
-          Agregar al carrito
-        </button>
-      </div>
-    `;
-  });
+                    <div class="card libro-card">
+
+                        <img src="imagenes/${libro.imagen}" class="card-img-top">
+
+                        <div class="card-body">
+
+                            <h6>${libro.titulo}</h6>
+
+                            <div class="precio">$${libro.precio}</div>
+
+                            <p class="${libro.stock > 0 ? 'text-success' : 'text-danger'}">
+                                ${libro.stock > 0 ? 'Disponibles: ' + libro.stock : 'AGOTADO'}
+                            </p>
+
+                            <span class="envio">Envío gratis</span><br>
+
+                            <a href="libros/libro.html?id=${libro.id}"
+                               class="btn btn-primary btn-sm mt-2">
+
+                               Ver más
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
 });

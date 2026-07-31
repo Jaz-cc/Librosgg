@@ -1,33 +1,67 @@
-/* Función que valida el acceso del usuario.*/
-function login() {
-  // Obtiene el valor ingresado en el campo usuario
-  const usuario = document.getElementById("usuario").value;
+async function login() {
 
-  // Obtiene el valor ingresado en el campo contraseña
-  const password = document.getElementById("password").value;
+    const correo = document.getElementById("correo").value;
 
-  // Elemento donde se mostrará el mensaje de resultado
-  const mensaje = document.getElementById("mensaje");
+    const password = document.getElementById("password").value;
 
-  // Credenciales fijas (solo para fines demostrativos)
-  // ⚠️ No recomendado para producción
-  const usuarioCorrecto = "pablo";
-  const passwordCorrecto = "12345678";
+    const mensaje = document.getElementById("mensaje");
 
-  // Valida si el usuario y la contraseña son correctos
-  if (usuario === usuarioCorrecto && password === passwordCorrecto) {
+    try {
 
-    // Muestra mensaje de éxito
-    mensaje.textContent = "Acceso concedido";
-    mensaje.className = "success";
+        const respuesta = await fetch(
+            "http://localhost:3000/api/login",
+            {
 
-    // Redirecciona al usuario a la página principal
-    window.location.href = "index.html";
+                method: "POST",
 
-  } else {
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-    // Muestra mensaje de error
-    mensaje.textContent = "Usuario o contraseña incorrectos";
-    mensaje.className = "error";
-  }
+                body: JSON.stringify({
+
+                    correo,
+                    password
+
+                })
+
+            }
+        );
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+
+            mensaje.textContent = datos.mensaje;
+
+            return;
+
+        }
+
+        // Guardar el token y el usuario
+        localStorage.setItem("token", datos.token);
+
+        localStorage.setItem(
+            "usuario",
+            JSON.stringify(datos.usuario)
+        );
+
+        mensaje.textContent = "Bienvenido " + datos.usuario.nombre;
+
+        if (datos.usuario.rol === "Administrador") {
+
+            window.location.href = "admin/index.html";
+
+        } else {
+
+            window.location.href = "index.html";
+
+        }
+
+    } catch (error) {
+
+        mensaje.textContent = "Error al conectar con el servidor.";
+
+    }
+
 }
