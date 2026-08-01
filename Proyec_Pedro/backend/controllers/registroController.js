@@ -1,62 +1,46 @@
 const Registro = require("../models/registroModel");
 
-const registrar = (req, res) => {
+const registrar = async (req, res) => {
+    try {
+        const { nombre, correo, password } = req.body;
 
-    const { nombre, correo, password } = req.body;
+        if (!nombre || !correo || !password) {
+            return res.status(400).json({
+                mensaje: "Nombre, correo y contraseña son obligatorios"
+            }); 
+        }
 
-    // Validación básica de campos
-    if (!nombre || !correo || !password) {
+        if (password.length < 6) {
+            return res.status(400).json({
+                mensaje: "La contraseña debe tener al menos 6 caracteres"
+            });
+        }
 
-        return res.status(400).json({
-            mensaje: "Nombre, correo y contraseña son obligatorios"
-        });
+        const existentes = await Registro.buscarPorCorreo(correo);
 
-    }
-
-    if (password.length < 6) {
-
-        return res.status(400).json({
-            mensaje: "La contraseña debe tener al menos 6 caracteres"
-        });
-
-    }
-
-    // Verificamos que el correo no esté registrado
-    Registro.buscarPorCorreo(correo, (error, resultados) => {
-
-        if (error)
-            return res.status(500).json(error);
-
-        if (resultados.length > 0)
+        if (existentes.length > 0) {
             return res.status(409).json({
                 mensaje: "Ese correo ya está registrado"
             });
+        }
 
-        // Por ahora guardamos la contraseña en texto plano,
-        // igual que en el login. Después cambiaremos a bcrypt.
-        Registro.registrar({ nombre, correo, password }, (error, resultado) => {
+        const resultado = await Registro.registrar({ nombre, correo, password });
 
-            if (error)
-                return res.status(500).json(error);
-
-            res.status(201).json({
-
-                mensaje: "Usuario registrado correctamente",
-
-                usuario: {
-
-                    id: resultado.insertId,
-                    nombre,
-                    correo
-
-                }
-
-            });
-
+        res.status(201).json({
+            mensaje: "Usuario registrado correctamente",
+            usuario: {
+                id: resultado.insertId,
+                nombre,
+                correo
+            }
         });
 
-    });
-
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            mensaje: "Error al registrar el usuario"
+        });
+    }
 };
 
 module.exports = {

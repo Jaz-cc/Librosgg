@@ -7,6 +7,8 @@ const categoriaRoutes = require("./routes/categoriaRoutes");
 const authRoutes = require("./routes/authRoutes");
 const carritoRoutes = require("./routes/carritoRoutes");
 const ventasRoutes = require("./routes/ventasRoutes");
+const registroRoutes = require("./routes/registroRoutes");
+const usuarioRoutes = require("./routes/usuarioRoutes");
 
 const conexion = require("./config/db");
 
@@ -19,6 +21,8 @@ app.use("/api/categorias", categoriaRoutes);
 app.use("/api", authRoutes);
 app.use("/api/carrito", carritoRoutes);
 app.use("/api/ventas", ventasRoutes);
+app.use("/api", registroRoutes);
+app.use("/api/usuarios", usuarioRoutes);
 
 app.get("/", (req, res) => {
 

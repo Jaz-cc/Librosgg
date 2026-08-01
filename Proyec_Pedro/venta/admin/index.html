@@ -6,19 +6,384 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Administrador</title>
 
-    <link rel="stylesheet" href="../css/estilos.css">
+    <!-- Se conserva el CSS global del sitio, tal cual. -->
+    <link rel="stylesheet" href="../css/estilo.css">
+
+    <!--
+        Estilos propios del panel. Van aquí dentro (no en estilo.css) y
+        todas las clases llevan el prefijo "ap-" para no interferir con
+        el resto del sitio. Solo afectan a esta página.
+    -->
+    <style>
+        :root {
+            --ap-ink: #131921;
+            --ap-ink-2: #232f3e;
+            --ap-gold: #ffd814;
+            --ap-gold-deep: #f7ca00;
+            --ap-gold-border: #fcd200;
+            --ap-surface: #ffffff;
+            --ap-bg: #eaecee;
+            --ap-line: #e3e6e6;
+            --ap-muted: #565959;
+            --ap-danger: #b12704;
+            --ap-danger-bg: #fff1ef;
+            --ap-danger-line: #f3c9c2;
+        }
+
+        /* Fondo y base de la página del panel */
+        body.ap {
+            background: var(--ap-bg);
+            color: var(--ap-ink);
+        }
+
+        /* ---------- Barra superior fija ---------- */
+        .ap-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            padding: 16px 24px;
+            background: var(--ap-ink);
+            border-bottom: 3px solid var(--ap-gold);
+        }
+
+        .ap-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Lomo de libro: la marca visual que ancla el panel a la tienda */
+        .ap-spine {
+            width: 10px;
+            height: 30px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, var(--ap-gold), var(--ap-gold-deep));
+            box-shadow: inset -2px 0 0 rgba(0, 0, 0, .18);
+            flex: none;
+        }
+
+        .ap-topbar h1 {
+            margin: 0;
+            text-align: left;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+
+        .ap-topbar #cerrarSesion {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, .35);
+            color: #fff;
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s ease, border-color .15s ease;
+        }
+
+        .ap-topbar #cerrarSesion:hover {
+            background: rgba(255, 255, 255, .12);
+            border-color: #fff;
+        }
+
+        /* ---------- Contenedor principal ---------- */
+        /* Anula el estilo global de <main> (estilo.css lo limita a 900px/blanco) */
+        .ap .ap-main {
+            max-width: 1140px;
+            width: auto;
+            margin: 0 auto;
+            padding: 34px 24px 72px;
+            background: transparent;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        /* ---------- Módulo (Libros / Usuarios) ---------- */
+        .ap-modulo {
+            margin-bottom: 46px;
+        }
+
+        .ap-modhead {
+            padding-left: 14px;
+            border-left: 4px solid var(--ap-gold);
+            margin-bottom: 18px;
+        }
+
+        .ap-eyebrow {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--ap-muted);
+        }
+
+        .ap-title {
+            margin: 3px 0 0;
+            text-align: left;
+            color: var(--ap-ink);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* ---------- Tarjetas ---------- */
+        .ap-card {
+            background: var(--ap-surface);
+            border: 1px solid var(--ap-line);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+        }
+
+        .ap-card+.ap-card {
+            margin-top: 18px;
+        }
+
+        .ap-cardlabel {
+            margin: 0 0 16px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ap-muted);
+        }
+
+        /* ---------- Formulario ---------- */
+        .ap-formgrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        .ap-campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ap-campo-full {
+            grid-column: 1 / -1;
+        }
+
+        .ap input,
+        .ap select,
+        .ap textarea {
+            width: 100%;
+            padding: 11px 12px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--ap-ink);
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 9px;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .ap input::placeholder,
+        .ap textarea::placeholder {
+            color: #8a8f8f;
+        }
+
+        .ap input:focus,
+        .ap select:focus,
+        .ap textarea:focus {
+            outline: none;
+            border-color: var(--ap-gold-border);
+            box-shadow: 0 0 0 3px rgba(240, 193, 75, .35);
+        }
+
+        .ap textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .ap-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        /* Botones del panel */
+        .ap-btn {
+            padding: 11px 20px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background .15s ease, border-color .15s ease;
+        }
+
+        .ap-btn-primary {
+            background: var(--ap-gold);
+            border-color: var(--ap-gold-border);
+            color: var(--ap-ink);
+        }
+
+        .ap-btn-primary:hover {
+            background: var(--ap-gold-deep);
+        }
+
+        .ap-btn-ghost {
+            background: #fff;
+            border-color: #d5d9d9;
+            color: var(--ap-ink);
+        }
+
+        .ap-btn-ghost:hover {
+            background: #f7f8f8;
+        }
+
+        .ap-msg {
+            min-height: 18px;
+            margin: 12px 0 0;
+            font-size: 13px;
+            color: var(--ap-muted);
+        }
+
+        /* ---------- Tabla ---------- */
+        .ap-tablawrap {
+            overflow-x: auto;
+            border: 1px solid var(--ap-line);
+            border-radius: 14px;
+            background: #fff;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .ap-table {
+            width: 100%;
+            min-width: 640px;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        .ap-table thead th {
+            padding: 13px 14px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #fff;
+            background: var(--ap-ink);
+            white-space: nowrap;
+        }
+
+        .ap-table tbody td {
+            padding: 12px 14px;
+            border-top: 1px solid var(--ap-line);
+            font-size: 14px;
+            color: var(--ap-ink);
+            vertical-align: middle;
+        }
+
+        .ap-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .ap-table tbody tr:hover {
+            background: #fffbe9;
+        }
+
+        .ap-table img {
+            display: block;
+            border-radius: 6px;
+        }
+
+        /* Botones de acción inyectados por admin.js / usuarios.js
+           (no traen clase, así que se estilizan por posición:
+            el primero = Editar, el último = Eliminar). */
+        .ap-table td button {
+            padding: 7px 13px;
+            margin-right: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ap-ink);
+            background: #fff;
+            border: 1px solid #d5d9d9;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: background .15s ease;
+        }
+
+        .ap-table td button:hover {
+            background: #f2f3f3;
+        }
+
+        .ap-table td button:last-child {
+            color: var(--ap-danger);
+            background: var(--ap-danger-bg);
+            border-color: var(--ap-danger-line);
+        }
+
+        .ap-table td button:last-child:hover {
+            background: #ffe3de;
+        }
+
+        /* ---------- Accesibilidad ---------- */
+        .ap button:focus-visible,
+        .ap a:focus-visible,
+        .ap input:focus-visible,
+        .ap select:focus-visible,
+        .ap textarea:focus-visible {
+            outline: 2px solid var(--ap-gold-border);
+            outline-offset: 2px;
+        }
+
+        /* ---------- Responsivo ---------- */
+        @media (max-width: 640px) {
+            .ap-topbar {
+                padding: 14px 16px;
+            }
+
+            .ap-topbar h1 {
+                font-size: 18px;
+            }
+
+            .ap .ap-main {
+                padding: 24px 16px 56px;
+            }
+
+            .ap-card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .ap-title {
+                font-size: 20px;
+            }
+
+            .ap-modulo {
+                margin-bottom: 36px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ap * {
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
 
 
-<body>
+<body class="ap">
 
 
-    <header>
+    <header class="ap-topbar">
 
-        <h1>
-            Panel de Administrador
-        </h1>
-
+        <div class="ap-brand">
+            <span class="ap-spine" aria-hidden="true"></span>
+            <h1>Panel de administrador</h1>
+        </div>
 
         <button id="cerrarSesion">
             Cerrar sesión
@@ -29,135 +394,179 @@
 
 
 
-    <main>
+    <main class="ap-main">
 
 
-        <section>
+        <!-- ============ CRUD DE LIBROS ============ -->
+
+        <section class="ap-modulo">
+
+            <div class="ap-modhead">
+                <p class="ap-eyebrow">Catálogo</p>
+                <h2 class="ap-title">Libros</h2>
+            </div>
 
 
-            <h2>
-                Agregar / Editar libro
-            </h2>
+            <div class="ap-card">
+
+                <p class="ap-cardlabel">Agregar o editar libro</p>
+
+                <div class="ap-formgrid">
+
+                    <input type="hidden" id="idLibro">
+
+                    <div class="ap-campo">
+                        <input type="text" id="titulo" placeholder="Título">
+                    </div>
+
+                    <div class="ap-campo">
+                        <input type="text" id="autor" placeholder="Autor">
+                    </div>
+
+                    <div class="ap-campo">
+                        <input type="number" id="precio" placeholder="Precio">
+                    </div>
+
+                    <div class="ap-campo">
+                        <input type="number" id="stock" placeholder="Stock">
+                    </div>
+
+                    <div class="ap-campo">
+                        <input type="text" id="imagen" placeholder="URL imagen">
+                    </div>
+
+                    <div class="ap-campo">
+                        <input type="number" id="categoria_id" placeholder="ID categoría">
+                    </div>
+
+                    <div class="ap-campo ap-campo-full">
+                        <textarea id="descripcion" placeholder="Descripción"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="ap-actions">
+                    <button id="guardarLibro" class="ap-btn ap-btn-primary">
+                        Guardar libro
+                    </button>
+                    <button id="cancelarEdicion" class="ap-btn ap-btn-ghost">
+                        Limpiar
+                    </button>
+                </div>
+
+                <p id="mensaje" class="ap-msg"></p>
+
+            </div>
 
 
+            <div class="ap-card">
 
-            <input type="hidden" id="idLibro">
+                <p class="ap-cardlabel">Listado</p>
 
+                <div class="ap-tablawrap">
+                    <table class="ap-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Imagen</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaLibros">
+                        </tbody>
+                    </table>
+                </div>
 
-
-            <input type="text" id="titulo" placeholder="Título">
-
-
-
-            <input type="text" id="autor" placeholder="Autor">
-
-
-
-            <input type="number" id="precio" placeholder="Precio">
-
-
-
-            <input type="number" id="stock" placeholder="Stock">
-
-
-
-            <input type="text" id="imagen" placeholder="URL imagen">
-
-
-
-            <textarea id="descripcion" placeholder="Descripción">
-</textarea>
-
-
-
-
-            <input type="number" id="categoria_id" placeholder="ID categoría">
-
-
-
-
-
-            <button id="guardarLibro">
-
-                Guardar libro
-
-            </button>
-
-
-
-            <button id="cancelarEdicion">
-
-                Limpiar
-
-            </button>
-
-
-
-            <p id="mensaje"></p>
-
-
+            </div>
 
         </section>
 
 
 
 
+        <!-- ============ CRUD DE USUARIOS ============ -->
+
+        <section class="ap-modulo">
+
+            <div class="ap-modhead">
+                <p class="ap-eyebrow">Cuentas</p>
+                <h2 class="ap-title">Usuarios</h2>
+            </div>
 
 
-        <section>
+            <div class="ap-card">
+
+                <p class="ap-cardlabel">Agregar o editar usuario</p>
+
+                <div class="ap-formgrid">
+
+                    <input type="hidden" id="idUsuario">
+
+                    <div class="ap-campo">
+                        <input type="text" id="nombreUsuario" placeholder="Nombre completo">
+                    </div>
+
+                    <div class="ap-campo">
+                        <input type="email" id="correoUsuario" placeholder="Correo electrónico">
+                    </div>
+
+                    <div class="ap-campo">
+                        <input type="password" id="passwordUsuario"
+                               placeholder="Contraseña (mín. 6, en blanco al editar = sin cambio)">
+                    </div>
+
+                    <!-- Los value deben coincidir con los id de la tabla 'roles'.
+                         Según registroModel: 2 = Cliente, por lo que 1 = Administrador. -->
+                    <div class="ap-campo">
+                        <select id="rolUsuario">
+                            <option value="2">Cliente</option>
+                            <option value="1">Administrador</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="ap-actions">
+                    <button id="guardarUsuario" class="ap-btn ap-btn-primary">
+                        Guardar usuario
+                    </button>
+                    <button id="cancelarEdicionUsuario" class="ap-btn ap-btn-ghost">
+                        Limpiar
+                    </button>
+                </div>
+
+                <p id="mensajeUsuario" class="ap-msg"></p>
+
+            </div>
 
 
-            <h2>
-                Lista de libros
-            </h2>
+            <div class="ap-card">
 
+                <p class="ap-cardlabel">Listado</p>
 
+                <div class="ap-tablawrap">
+                    <table class="ap-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuarios">
+                        </tbody>
+                    </table>
+                </div>
 
-
-            <table border="1">
-
-
-                <thead>
-
-
-                    <tr>
-
-                        <th>ID</th>
-
-                        <th>Título</th>
-
-                        <th>Autor</th>
-
-                        <th>Precio</th>
-
-                        <th>Stock</th>
-
-                        <th>Imagen</th>
-
-                        <th>Acciones</th>
-
-
-                    </tr>
-
-
-                </thead>
-
-
-
-
-                <tbody id="tablaLibros">
-
-
-                </tbody>
-
-
-
-            </table>
-
-
+            </div>
 
         </section>
-
 
 
     </main>
@@ -166,6 +575,8 @@
 
 
     <script src="../js/admin.js"></script>
+
+    <script src="../js/usuarios.js"></script>
 
 
 </body>
