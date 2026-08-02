@@ -2,10 +2,30 @@ const express = require("express");
 
 const router = express.Router();
 
-const verificarToken = require("../middleware/authMiddleware");
+const ventasController =
+require("../controllers/ventasController");
 
-const controlador = require("../controllers/ventasController");
+const verificarToken =
+require("../middleware/authMiddleware");
 
-router.post("/", verificarToken, controlador.realizarCompra);
+router.post(
+
+    "/",
+
+    verificarToken,
+
+    ventasController.realizarCompra
+
+);
+
+router.get(
+
+    "/",
+
+    verificarToken,
+
+    ventasController.obtenerHistorial
+
+);
 
 module.exports = router;
